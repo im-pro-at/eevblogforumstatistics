@@ -13,6 +13,7 @@ import sys
 import json
 import urllib
 
+api_key="{your google api key}"
 replace={ "Today at": "July 16, 2017,", "Yesterday at": "July 15, 2017,"}
 url="http://www.eevblog.com/forum/contests/giveaway-rohde-schwarz-rtb2004-oscilloscope/?all"
 
@@ -187,7 +188,6 @@ for ids in idss:
     sids=""
     for id in ids:
       sids=sids+id+","
-    api_key="AIzaSyDUrYHTaR51Wm8iYeQERTHYwAesQmsCVNQ"
     searchUrl="https://www.googleapis.com/youtube/v3/videos?id="+sids+"&key="+api_key+"&part=contentDetails"
     response = urllib.urlopen(searchUrl).read()
     for dur in json.loads(response)['items']:
