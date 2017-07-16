@@ -16,13 +16,13 @@ import urllib
 #user input
 api_key=open('api-key', 'r').read() #copy your api key into api-key file
 replace={ "Today at": "July 16, 2017,", "Yesterday at": "July 15, 2017,"}
-url="http://www.eevblog.com/forum/contests/giveaway-rohde-schwarz-rtb2004-oscilloscope/?all"
+url="http://www.eevblog.com/forum/contests/giveaway-rohde-schwarz-rtb2004-oscilloscope/" #?all will be added!
 
 
 #Load page
 opener = urllib2.build_opener()
 opener.addheaders = [('User-Agent', 'Mozilla/5.0')]
-response = opener.open(url)
+response = opener.open(url+"?all")
 page = response.read()
 
 #pares page
@@ -47,6 +47,10 @@ for post in soup.find('div', id="forumposts").form.find_all('div', recursive=Fal
         aktentry['edit']=None
     aktentry['date']=post.find('div', class_="keyinfo").find("div",class_="smalltext").text.split("on:")[1][:-2].strip()
 
+    aktentry['post_id']=post.find('div', class_="keyinfo").h5['id'].split("subject_")[1]
+
+    aktentry['thanked']=post.find('div', class_="moderatorbar").find("div",class_="thanks")
+    
     videos=[]
     for iframe in post.find('div', class_="postarea").find('div', class_="post").find_all("iframe"):
         videos.append(iframe["src"])
@@ -72,7 +76,6 @@ for post in soup.find('div', id="forumposts").form.find_all('div', recursive=Fal
     data.append(aktentry)
 
 data.remove(data[0]) #ignore post creator
-print "#"+str(len(data))
 
 # Generate a word cloud image
 text=""
@@ -195,12 +198,14 @@ def split_list(alist, wanted_parts=1):
 idss= split_list(ids, wanted_parts=len(ids)/40+1)
 
 durs=[]
+videosoffline=0;
 for ids in idss:
     sids=""
     for id in ids:
       sids=sids+id+","
     searchUrl="https://www.googleapis.com/youtube/v3/videos?id="+sids+"&key="+api_key+"&part=contentDetails"
     response = urllib.urlopen(searchUrl).read()
+    videosoffline=videosoffline+len(ids)-int(json.loads(response)["pageInfo"]["totalResults"])
     for dur in json.loads(response)['items']:
         dur=dur['contentDetails']['duration']
         if "M" in dur and "S" in dur:
@@ -268,9 +273,67 @@ plt.ylabel('Posts')
 plt.title('Posts per country:')
 image = plt.savefig("posts_per_country.png")             
 
+#other stats
+def posttolinks(ar):
+    s="{"
+    for i, a in enumerate(ar):
+        s=s+" [url="+url+"msg"+a+"/#msg"+a+"]"+str(i)+"[/url]"
+    s=s+" }"
+    return s
 
+doubleusers=[]
+doubleposts=[]
+for i1, d1 in enumerate(data):
+    for i2, d2 in enumerate(data):
+        if i1 < i2 and d1["user_id"] == d2["user_id"]:
+            if d1["user_id"] not in doubleusers:
+                doubleusers.append(d1["user_id"])
+            if d1["post_id"] not in doubleposts:
+                doubleposts.append(d1["post_id"])
+            if d2["post_id"] not in doubleposts:
+                doubleposts.append(d2["post_id"])
+withoutvideo=[]
+morethenonevideo=[]
+longtext=[]
+moded=[]
+thanked=[]
+for t in data:
+    if len(t["video"])==0:
+        withoutvideo.append(t["post_id"])
+    if len(t["video"])>1:
+        morethenonevideo.append(t["post_id"])
+    if len(t["text"])>1000:
+        longtext.append(t["post_id"])
+    if t['edit']!=None:
+        moded.append(t["post_id"])
+    if t['thanked']!=None:
+        thanked.append(t["post_id"])
+        
+                
+print "Number of posts: "+str(len(data))
+print "Number of posts with vimeo videos: "+str(cvimo)+" {for this it will count as post without video}"
+print "Number of videos offline: " + str(videosoffline)
+print "Users with more then 1 post: "+str(len(doubleusers))+" "+posttolinks(doubleposts)              
+print "Posts with no video: "+str(len(withoutvideo))+" "+posttolinks(withoutvideo)              
+print "Posts with more then one video: "+str(len(morethenonevideo))+" "+posttolinks(morethenonevideo)              
+print "Posts with more then 1000 characters: "+str(len(longtext))+" "+posttolinks(longtext)              
+print "Posts changed: "+str(len(moded))+" "+posttolinks(moded)              
+print "Posts thanked by at least on user: "+str(len(thanked))+" "+posttolinks(thanked)              
 
-
-
-print "done"
-
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
