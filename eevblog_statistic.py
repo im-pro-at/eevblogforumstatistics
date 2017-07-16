@@ -28,6 +28,7 @@ page = response.read()
 #pares page
 soup = BeautifulSoup(page, 'html.parser')
 data=[]
+cvimo=0;
 for post in soup.find('div', id="forumposts").form.find_all('div', recursive=False):
     aktentry={}
     post=post.find('div', class_="post_wrapper")
@@ -52,15 +53,22 @@ for post in soup.find('div', id="forumposts").form.find_all('div', recursive=Fal
     for a in post.find('div', class_="postarea").find('div', class_="post").find_all("a"):
         videos.append(a["href"])
         
-    aktentry['test']=videos
     aktentry['video']=[]
     for v in videos:    
         if len(v.split("youtu.be/"))==2:
             aktentry['video'].append(v.split("youtu.be/")[1].split("?")[0])
-        if len(v.split("www.youtube.com/embed/"))==2:
+        elif len(v.split("www.youtube.com/embed/"))==2:
             aktentry['video'].append(v.split("www.youtube.com/embed/")[1].split("?")[0])
-        if len(v.split("www.youtube.com/watch?v="))==2:
+        elif len(v.split("www.youtube.com/watch?v="))==2:
             aktentry['video'].append(v.split("www.youtube.com/watch?v=")[1].split("&")[0])
+        elif len(v.split("player.vimeo.com/video/"))==2:
+            cvimo=cvimo+1;
+    
+    if poster.find('li', class_="gender")!=None:   
+        aktentry['user_country']=poster.find('li', class_="gender").img["alt"]
+    else:
+        aktentry['user_country']=""
+    
     data.append(aktentry)
 
 data.remove(data[0]) #ignore post creator
@@ -235,6 +243,32 @@ plt.xticks(y_pos, name, rotation=30)
 plt.ylabel('Videos')
 plt.title('Videos per length:')
 image = plt.savefig("videos_per_length.png")             
+
+#Posts per country
+countries={}
+for t in data:
+    if t['user_country'] not in countries:
+        countries[t['user_country']]=0;
+    countries[t['user_country']]=countries[t['user_country']]+1;
+
+name=[]
+count=[]
+for country in sorted(countries.iterkeys()):
+    if country=="":
+        name.append("None")
+    else:
+        name.append(country)
+    count.append(countries[country])
+    
+y_pos = np.arange(len(name))
+plt.clf()
+plt.bar(y_pos, count, align='center', alpha=0.5)
+plt.xticks(y_pos, name, rotation=90,size=8)
+plt.ylabel('Posts')
+plt.title('Posts per country:')
+image = plt.savefig("posts_per_country.png")             
+
+
 
 
 
