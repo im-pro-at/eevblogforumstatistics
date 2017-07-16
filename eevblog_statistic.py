@@ -13,16 +13,19 @@ import sys
 import json
 import urllib
 
-api_key="{your google api key}"
+#user input
+api_key=open('api-key', 'r').read() #copy your api key into api-key file
 replace={ "Today at": "July 16, 2017,", "Yesterday at": "July 15, 2017,"}
 url="http://www.eevblog.com/forum/contests/giveaway-rohde-schwarz-rtb2004-oscilloscope/?all"
 
+
+#Load page
 opener = urllib2.build_opener()
 opener.addheaders = [('User-Agent', 'Mozilla/5.0')]
 response = opener.open(url)
 page = response.read()
 
-
+#pares page
 soup = BeautifulSoup(page, 'html.parser')
 data=[]
 for post in soup.find('div', id="forumposts").form.find_all('div', recursive=False):
@@ -153,14 +156,14 @@ lv=0
 for v in [3,6,8,10,30,80,100,300,800,sys.maxint]:
     c=0;
     for t in posts:
-        if lv<t and v>=t:
+        if lv<=t and v>=t:
             c=c+1;
     if v==sys.maxint:
         name.append(str(lv)+"-MAX")
     else:
         name.append(str(lv)+"-"+str(v))
     count.append(c)
-    lv=v;
+    lv=v+1;
     
 y_pos = np.arange(len(name))
 plt.clf()
@@ -215,17 +218,15 @@ count=[]
 lv=0
 for v in [30,45,60,75,90,105,110,115,120,125,130,135,150,sys.maxint]:
     c=0;
-    print "v", v
     for t in durs:
-        if lv<t and v>=t:
-            print t
+        if lv<=t and v>=t:
             c=c+1;
     if v==sys.maxint:
         name.append(dur_to_string(lv)+"-MAX")
     else:
         name.append(dur_to_string(lv)+"-"+dur_to_string(v))
     count.append(c)
-    lv=v;
+    lv=v+1;
     
 y_pos = np.arange(len(name))
 plt.clf()
