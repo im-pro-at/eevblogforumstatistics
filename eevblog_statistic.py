@@ -299,7 +299,7 @@ image = plt.savefig("posts_per_country.png")
 
 
 
-#Vido lentg ofer post data
+#Video length over entry day
 xs=[]
 ys=[]
 for t in data:
@@ -325,7 +325,47 @@ ax.set_ylabel('Entry Day')
 plt.title('Video length over entry day:')
 image = plt.savefig("videolength_per_entryday.png")    
     
+#Video length over text length
+xs=[]
+ys=[]
+for t in data:
+    if len(t["video_dur"])>0 and t["video_dur"][0]>60 and t["video_dur"][0]<180:
 
+        xs.append(t["video_dur"][0])
+        ys.append(len(t["text"]))
+
+plt.clf()
+fig = plt.figure()
+ax = fig.add_subplot(1,1,1)
+ax.scatter(xs,ys)
+#plt.xticks(y_pos, name, rotation=90,size=8)
+ax.set_xlabel('Video length [s]')
+ax.set_ylabel('Text length')
+ax.set_yscale('log')
+plt.title('Video length over text length:')
+image = plt.savefig("videolength_per_textlength.png")    
+    
+#Video length over post count
+xs=[]
+ys=[]
+for t in data:
+    if len(t["video_dur"])>0 and t["video_dur"][0]>60 and t["video_dur"][0]<180:
+
+        xs.append(t["video_dur"][0])
+        ys.append(t["user_postcount"])
+
+plt.clf()
+fig = plt.figure()
+ax = fig.add_subplot(1,1,1)
+ax.scatter(xs,ys)
+#plt.xticks(y_pos, name, rotation=90,size=8)
+ax.set_xlabel('Video length [s]')
+ax.set_ylabel('User post count')
+ax.set_yscale('log')
+plt.title('Video length over post count:')
+image = plt.savefig("videolength_per_userposts.png")    
+
+    
 #other stats
 def posttolinks(ar):
     s="{"
@@ -373,20 +413,3 @@ print "Posts with more then 1000 characters: "+str(len(longtext))+" "+posttolink
 print "Posts changed: "+str(len(moded))+" "+posttolinks(moded)              
 print "Posts thanked by at least on user: "+str(len(thanked))+" "+posttolinks(thanked)              
 
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
